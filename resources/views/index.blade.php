@@ -8,7 +8,7 @@
         <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
         <link rel="icon" href="/favicon.ico">
         <title>Esport | Versal studio</title>
-        <script defer="defer" src="{{asset('/js/chunk-vendors.0244b69b.js')}}"></script><script defer="defer" src="{{asset('/js/app.d020bb52.js')}}"></script>
+        <script defer="defer" src="{{asset('/public/js/chunk-vendors.0244b69b.js')}}"></script><script defer="defer" src="{{asset('/js/app.d020bb52.js')}}"></script>
         <link href="{{asset('/css/chunk-vendors.b9521ecd.css')}}" rel="stylesheet">
         <link href="{{asset('/css/app.36f5dd88.css')}}" rel="stylesheet">
     </head>
