@@ -4,9 +4,12 @@ namespace App\Http\Controllers\Service;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Util\UtilService;
+use App\Http\Controllers\Service\RoleService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Models\User;
+use App\Models\Role;
+use App\Models\RoleUser;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Cookie;
@@ -14,7 +17,7 @@ use Illuminate\Support\Str;
 use Carbon\Carbon;
 use DB;
 
-class UserService extends Controller
+class UserService
 {
     public static function getAll(){
         $user = User::select("id", "userName", "name","passWord")->get();
@@ -50,13 +53,13 @@ class UserService extends Controller
     public static function login($request){
         $userName = $request->input("userName");
         $password = $request->input("password");
-        $deviceToken = $request->input("token");
+        // $deviceToken = $request->input("token");
         $user = User::where("userName",$userName)
                     ->first();
         
         if(!$user || !Hash::check($password,$user->password)) return response("Tên đăng nhập hoặc mật khẩu không tồn tại",400);
-        $user->deviceToken = $deviceToken;
-        $user->save();
+        // $user->deviceToken = $deviceToken;
+        // $user->save();
         $arrUser = [
             "id"=>$user->id,
             "userName"=>$userName,
@@ -85,6 +88,7 @@ class UserService extends Controller
             "userName"=>"required",
             "passWord"=>"required",
             "name"=>"required",
+            "listRoleId"=>"required",
         ]);
 
         $name = $request->input("userName");
@@ -96,11 +100,23 @@ class UserService extends Controller
         $user->userName = $request->input("userName");
         $user->name = $request->input("name");
         $user->password = Hash::make($request->input("password"));
-        
+        $user->guid = Str::uuid()->toString();
+
 
         $idMax = User::max("id");
         $user->id = $idMax+1;
         $user->save();
+
+        $listRoleId = $request->listRoleId;
+        $listRole = [];
+        foreach($listRoleId as $roleId){
+            $role = new RoleUser();
+            $role->roleId = $roleId;
+            $role->userId = $idMax;
+            array_push($listRole, $role);
+        }
+        //$user->listRole = $listRole;
+        $user->listRole = RoleService::capNhatRole($listRole);
         return response($user,200);
     }
 
