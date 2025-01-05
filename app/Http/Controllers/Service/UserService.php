@@ -86,9 +86,10 @@ class UserService
     public static function create(Request $request){
         $validate = $request->validate([
             "userName"=>"required",
+            "email"=>"required",
             "passWord"=>"required",
             "name"=>"required",
-            "listRoleId"=>"required",
+            "loaiTaiKhoanId"=>"required"
         ]);
 
         $name = $request->input("userName");
@@ -100,8 +101,27 @@ class UserService
         $user->userName = $request->input("userName");
         $user->name = $request->input("name");
         $user->password = Hash::make($request->input("password"));
+        $user->loaiTaiKhoanId = $request->input("loaiTaiKhoanId");
+        $user->email = $request->input("email");
         $user->guid = Str::uuid()->toString();
 
+        $user->tenClb = $request->input("tenClb");
+        $user->vietTatClb = $request->input("vietTatClb");
+        $user->toChucClb = $request->input("toChucClb");
+        $user->linkFanpageClb = $request->input("linkFanpageClb");
+        $user->hoTenDaiDienClb = $request->input("hoTenDaiDienClb");
+        $user->chucVuDaiDienClb = $request->input("chucVuDaiDienClb");
+        $user->tinhThanhPhoDaiDienClb = $request->input("tinhThanhPhoDaiDienClb");
+
+        $user->dienThoaiCaNhan = $request->input("dienThoaiCaNhan");
+        $user->ngaySinhCaNhan = $request->input("ngaySinhCaNhan");
+        $user->chucVuCaNhan = $request->input("chucVuCaNhan");
+        $user->tinhThanhPhoCaNhan = $request->input("tinhThanhPhoCaNhan");
+        $user->clbCaNhan = $request->input("clbCaNhan");
+        $user->truongCaNhan = $request->input("truongCaNhan");
+        
+        $user->createdAt = Carbon::now('Asia/Ho_Chi_Minh');
+        $user->updatedAt = Carbon::now('Asia/Ho_Chi_Minh');
 
         $idMax = User::max("id");
         $user->id = $idMax+1;
@@ -112,7 +132,7 @@ class UserService
         foreach($listRoleId as $roleId){
             $role = new RoleUser();
             $role->roleId = $roleId;
-            $role->userId = $idMax;
+            $role->userId = $idMax+1;
             array_push($listRole, $role);
         }
         //$user->listRole = $listRole;
