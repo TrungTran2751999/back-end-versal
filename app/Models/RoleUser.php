@@ -13,6 +13,7 @@ class RoleUser extends Model
     protected $fillable = [
         'id',
         'roleId',
-        'userId'
+        'userId',
+        'isDeleted'
     ];
 }

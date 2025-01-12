@@ -27,6 +27,12 @@ Route::prefix("/api")->group(function(){
         Route::prefix("/role")->group(function(){
             Route::get("/",[RoleApi::class,'getAll']);
         });
+
+        Route::prefix("/user")->group(function(){
+            Route::post("/",[UserApi::class,'getAllPaginate']);
+            Route::get("/chi-tiet",[UserApi::class,'getById']);
+            Route::post("/update",[UserApi::class,'update']);
+        });
     });
     // ==============USER==============
     // Route::prefix("/user")->group(function(){

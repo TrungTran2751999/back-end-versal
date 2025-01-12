@@ -13,6 +13,15 @@ class UserApi extends Controller
     public function getAll(){
         return UserService::getAll();
     }
+    public function getAllPaginate(Request $request){
+        $validate = $request->validate([
+            "start"=>"required",
+            "limit"=>"required"
+        ]);
+        $start = $request->start;
+        $limit = $request->limit;
+        return UserService::getAllPaginate($start, $limit);
+    }
     public function getById(Request $request){
         $id = $request->input("id");
         return UserService::getById($id);

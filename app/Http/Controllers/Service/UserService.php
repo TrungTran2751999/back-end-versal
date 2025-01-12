@@ -23,6 +23,19 @@ class UserService
         $user = User::select("id", "userName", "name","passWord")->get();
         return response($user,200);
     }
+    public static function getAllPaginate($start, $limit){
+        $listUser = DB::select("SELECT 
+        id,
+        guid,
+        userName,
+        name,
+        email,
+        loaiTaiKhoanId,
+        dienThoaiCaNhan,
+        ngaySinhCaNhan
+        FROM user LIMIT ? OFFSET ?", [$limit, $start]);
+        return $listUser;
+    }
     // public static function getMemberTeam(){
     //     $user = User::leftJoin("image", 'user.imageId', '=', 'image.id')
     //                 ->select("user.id","user.name", "user.position", "user.coporation","image.path as image")
@@ -44,13 +57,18 @@ class UserService
     // }
 
     public static function getById($id){
-        $user = User::where("id",$id)->first();
+        $user = User::where("guid",$id)->first();
         if(!$user) return response("User không tồn tại",400);
+        $roleUser = RoleUser::where("userId", $user->id)
+                            ->where("isDeleted", null)
+                            ->orWhere("isDeleted", false)
+                            ->get();
+        $user->listRole = $roleUser;
         
         return response($user,200);
     }
 
-    public static function login($request){
+    public static function login(Request $request){
         $userName = $request->input("userName");
         $password = $request->input("password");
         // $deviceToken = $request->input("token");
@@ -84,70 +102,82 @@ class UserService
     }
 
     public static function create(Request $request){
-        $validate = $request->validate([
-            "userName"=>"required",
-            "email"=>"required",
-            "passWord"=>"required",
-            "name"=>"required",
-            "loaiTaiKhoanId"=>"required"
-        ]);
+        try{
+            DB::beginTransaction();
+            $validate = $request->validate([
+                "userName"=>"required",
+                "email"=>"required",
+                "passWord"=>"required",
+                "name"=>"required",
+                "loaiTaiKhoanId"=>"required"
+            ]);
 
-        $name = $request->input("userName");
-        $checkUser = User::where("userName",$name)->first();
+            $name = $request->input("userName");
+            $checkUser = User::where("userName",$name)->first();
 
-        if($checkUser) return response("Username đã tồn tại", 400);
+            if($checkUser) return response("Username đã tồn tại", 400);
 
-        $user = new User();
-        $user->userName = $request->input("userName");
-        $user->name = $request->input("name");
-        $user->password = Hash::make($request->input("password"));
-        $user->loaiTaiKhoanId = $request->input("loaiTaiKhoanId");
-        $user->email = $request->input("email");
-        $user->guid = Str::uuid()->toString();
+            $user = new User();
+            $user->userName = $request->input("userName");
+            $user->name = $request->input("name");
+            $user->password = Hash::make($request->input("password"));
+            $user->loaiTaiKhoanId = $request->input("loaiTaiKhoanId");
+            $user->email = $request->input("email");
+            $user->guid = Str::uuid()->toString();
 
-        $user->tenClb = $request->input("tenClb");
-        $user->vietTatClb = $request->input("vietTatClb");
-        $user->toChucClb = $request->input("toChucClb");
-        $user->linkFanpageClb = $request->input("linkFanpageClb");
-        $user->hoTenDaiDienClb = $request->input("hoTenDaiDienClb");
-        $user->chucVuDaiDienClb = $request->input("chucVuDaiDienClb");
-        $user->tinhThanhPhoDaiDienClb = $request->input("tinhThanhPhoDaiDienClb");
+            $user->tenClb = $request->input("tenClb");
+            $user->vietTatClb = $request->input("vietTatClb");
+            $user->toChucClb = $request->input("toChucClb");
+            $user->linkFanpageClb = $request->input("linkFanpageClb");
+            $user->hoTenDaiDienClb = $request->input("hoTenDaiDienClb");
+            $user->chucVuDaiDienClb = $request->input("chucVuDaiDienClb");
+            $user->tinhThanhPhoDaiDienClb = $request->input("tinhThanhPhoDaiDienClb");
 
-        $user->dienThoaiCaNhan = $request->input("dienThoaiCaNhan");
-        $user->ngaySinhCaNhan = $request->input("ngaySinhCaNhan");
-        $user->chucVuCaNhan = $request->input("chucVuCaNhan");
-        $user->tinhThanhPhoCaNhan = $request->input("tinhThanhPhoCaNhan");
-        $user->clbCaNhan = $request->input("clbCaNhan");
-        $user->truongCaNhan = $request->input("truongCaNhan");
-        
-        $user->createdAt = Carbon::now('Asia/Ho_Chi_Minh');
-        $user->updatedAt = Carbon::now('Asia/Ho_Chi_Minh');
+            $user->dienThoaiCaNhan = $request->input("dienThoaiCaNhan");
+            $user->ngaySinhCaNhan = $request->input("ngaySinhCaNhan");
+            $user->chucVuCaNhan = $request->input("chucVuCaNhan");
+            $user->tinhThanhPhoCaNhan = $request->input("tinhThanhPhoCaNhan");
+            $user->clbCaNhan = $request->input("clbCaNhan");
+            $user->truongCaNhan = $request->input("truongCaNhan");
+            
+            $user->createdAt = Carbon::now('Asia/Ho_Chi_Minh');
+            $user->updatedAt = Carbon::now('Asia/Ho_Chi_Minh');
 
-        $idMax = User::max("id");
-        $user->id = $idMax+1;
-        $user->save();
+            $idMax = User::max("id");
+            $user->id = $idMax+1;
+            $user->save();
 
-        $listRoleId = $request->listRoleId;
-        $listRole = [];
-        foreach($listRoleId as $roleId){
-            $role = new RoleUser();
-            $role->roleId = $roleId;
-            $role->userId = $idMax+1;
-            array_push($listRole, $role);
+            $listRoleId = $request->listRoleId;
+            $listRole = [];
+            foreach($listRoleId as $roleId){
+                $role = new RoleUser();
+                $role["roleId"] = $roleId;
+                $role['userId'] = $idMax+1;
+                array_push($listRole, $role);
+            }
+            //$user->listRole = $listRole;
+            $user->listRole = RoleService::capNhatRole($listRole);
+            DB::commit();
+            return response($user,200);
+        }catch(Exeption $e){
+            return response("Lỗi server",500);
+            DB::rollback();
         }
-        //$user->listRole = $listRole;
-        $user->listRole = RoleService::capNhatRole($listRole);
-        return response($user,200);
     }
 
-    public static function update($request){
+    public static function update(Request $request){
         try{
             DB::beginTransaction();
             $validate = $request->validate([
                 "id"=>"required",
                 "userName"=>"required",
                 "name"=>"required",
+                "email"=>"required",
+                "loaiTaiKhoanId"=>"required"
             ]);
+            $user = User::where("guid", $request->input("guid"))
+                        ->where("id", $request->input("id"))->first();
+            if($user) response("Tên user ko đã tồn tại",400);
             $checkUserExist = User::where("userName",$request->input("userName"))
                                       ->where("id", "<>", $request->input("id"))
                                       ->get();
@@ -157,8 +187,37 @@ class UserService
             }
             $user->userName = $request->input("userName");
             $user->name = $request->input("name");
-           
+            $password = $request->input("password");
+            if($password != null){
+                $user->password = Hash::make($request->input("password"));
+            }
+            $user->email = $request->input("email");
+            $user->dienThoaiCaNhan = $request->input("dienThoaiCaNhan");
+            $user->ngaySinhCaNhan = $request->input("ngaySinhCaNhan");
+            $user->loaiTaiKhoanId = $request->input("loaiTaiKhoanId");
+            $loaiTaiKhoanId = $user->loaiTaiKhoanId;
+            //ca-nhan
+            if($loaiTaiKhoanId==2){
+                $user->chucVuCaNhan = $request->input("chucVuCaNhan");
+                $user->tinhThanhPhoCaNhan = $request->input("tinhThanhPhoCaNhan");
+                $user->clbCaNhan = $request->input("clbCaNhan");
+                $user->truongCaNhan = $request->input("truongCaNhan");
+            }
+            if($loaiTaiKhoanId == 3){
+                //clb
+                $user->tenClb = $request->input("tenClb");
+                $user->vietTatClb = $request->input("vietTatClb");
+                $user->toChucClb = $request->input("toChucClb");
+                $user->linkFanpageClb = $request->input("linkFanpageClb");
+                $user->hoTenDaiDienClb = $request->input("hoTenDaiDienClb");
+                $user->chucVuDaiDienClb = $request->input("chucVuDaiDienClb");
+                $user->tinhThanhPhoDaiDienClb = $request->input("tinhThanhPhoDaiDienClb");
+            }
             $user->save();
+            $listRole = $request->listRole;
+            if($loaiTaiKhoanId == 1){
+                RoleService::capNhatRole($listRole);
+            }
             DB::commit();
         }catch(Exeption $e){
             return response("Lỗi server",500);
