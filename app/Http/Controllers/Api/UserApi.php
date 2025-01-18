@@ -22,11 +22,17 @@ class UserApi extends Controller
         $limit = $request->limit;
         return UserService::getAllPaginate($start, $limit);
     }
+    public function filterUser(Request $request){
+        $filter = $request["filter"];
+        $start = $request["start"];
+        $limit = $request["limit"];
+
+        return UserService::filterUser($filter, $start, $limit);
+    }
     public function getById(Request $request){
         $id = $request->input("id");
         return UserService::getById($id);
     }
-    
     public function login(Request $request){
         return UserService::login($request);
     } 
@@ -39,7 +45,6 @@ class UserApi extends Controller
     public function update(Request $request){
         return UserService::update($request);
     }
-    
     public function changePass(Request $request){
         return UserService::changePass($request);
     }

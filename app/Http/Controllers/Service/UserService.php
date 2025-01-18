@@ -36,6 +36,26 @@ class UserService
         FROM user LIMIT ? OFFSET ?", [$limit, $start]);
         return $listUser;
     }
+    public static function filterUser($filter, $start, $limit){
+        $keyWord = $filter["keyWord"];
+        $sqlKeyWord = !UtilService::IsNullOrEmpty($keyWord) ? 
+        " (userName LIKE '%$keyWord%' OR name LIKE '%$keyWord%' OR email LIKE '%$keyWord%' OR dienThoaiCaNhan LIKE '%$keyWord%')" 
+        : "";
+
+        $tinhThanhPho = $filter["tinhThanhPho"];
+        $sqlTinhThanhPho = !UtilService::IsNullOrEmpty($tinhThanhPho) ? " (tinhThanhPhoDaiDienClb LIKE '%$tinhThanhPho%' OR tinhThanhPhoCaNhan" : "";
+
+        $loaiTaiKhoan = $filter["loaiTaiKhoan"];
+        $sqlLoaiTaiKhoan = $loaiTaiKhoan > 0 ? " loaiTaiKhoanId = $loaiTaiKhoan" : "";
+
+        $sqlPhanTrang = $limit > 0 ? " LIMIT $limit OFFSET $start" : "";
+
+        $listCondition = UtilService::SqlHasCondition([$sqlKeyWord, $sqlTinhThanhPho, $sqlLoaiTaiKhoan]);
+        
+        $sql = "SELECT * FROM user $listCondition $sqlPhanTrang";
+
+        return response(DB::select($sql), 200);
+    }
     // public static function getMemberTeam(){
     //     $user = User::leftJoin("image", 'user.imageId', '=', 'image.id')
     //                 ->select("user.id","user.name", "user.position", "user.coporation","image.path as image")
@@ -115,7 +135,7 @@ class UserService
             $name = $request->input("userName");
             $checkUser = User::where("userName",$name)->first();
 
-            if($checkUser) return response("Username đã tồn tại", 400);
+            if($checkUser == null || $checkUser=="") return response("Username đã tồn tại", 400);
 
             $user = new User();
             $user->userName = $request->input("userName");
@@ -177,7 +197,7 @@ class UserService
             ]);
             $user = User::where("guid", $request->input("guid"))
                         ->where("id", $request->input("id"))->first();
-            if($user) response("Tên user ko đã tồn tại",400);
+            if($user==null || $user=="") response("Tên user ko đã tồn tại",400);
             $checkUserExist = User::where("userName",$request->input("userName"))
                                       ->where("id", "<>", $request->input("id"))
                                       ->get();

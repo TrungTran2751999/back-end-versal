@@ -32,6 +32,7 @@ Route::prefix("/api")->group(function(){
             Route::post("/",[UserApi::class,'getAllPaginate']);
             Route::get("/chi-tiet",[UserApi::class,'getById']);
             Route::post("/update",[UserApi::class,'update']);
+            Route::post("/filter", [UserApi::class, 'filterUser']);
         });
     });
     // ==============USER==============

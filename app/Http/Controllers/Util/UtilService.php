@@ -61,4 +61,25 @@ class UtilService extends Controller
             // }
         }
     }
+    public static function IsNullOrEmpty($str){
+        if($str === null || $str ===""){
+            return true;
+        }else{
+            return false;
+        }
+    }
+    public static function SqlHasCondition($listCondition){
+        $condition = "";
+        for($i=0; $i < count($listCondition); $i++){
+            if(!UtilService::IsNullOrEmpty($listCondition[$i])){
+                $paramCondition = $listCondition[$i];
+                if($condition == ""){
+                    $condition = $condition." WHERE $paramCondition";
+                }else{
+                    $condition = $condition." AND $paramCondition";
+                }
+            }
+        }
+        return $condition;
+    }
 }
