@@ -48,5 +48,7 @@ class UserApi extends Controller
     public function changePass(Request $request){
         return UserService::changePass($request);
     }
-    
+    public function getCount(){
+        return UserService::getCountKh();
+    }
 }

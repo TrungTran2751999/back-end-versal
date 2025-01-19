@@ -87,7 +87,6 @@ class UserService
         
         return response($user,200);
     }
-
     public static function login(Request $request){
         $userName = $request->input("userName");
         $password = $request->input("password");
@@ -111,7 +110,6 @@ class UserService
         $response->withCookie(cookie("id",$user->id, 3600*24*365)->withHttpOnly(false));
         return $response;
     }
-
     public static function logout(){
 
         $response = new Response();
@@ -120,7 +118,6 @@ class UserService
         $response->withCookie(Cookie::forget('id'));
         return $response;
     }
-
     public static function create(Request $request){
         try{
             DB::beginTransaction();
@@ -184,7 +181,6 @@ class UserService
             DB::rollback();
         }
     }
-
     public static function update(Request $request){
         try{
             DB::beginTransaction();
@@ -216,14 +212,15 @@ class UserService
             $user->ngaySinhCaNhan = $request->input("ngaySinhCaNhan");
             $user->loaiTaiKhoanId = $request->input("loaiTaiKhoanId");
             $loaiTaiKhoanId = $user->loaiTaiKhoanId;
+
             //ca-nhan
-            if($loaiTaiKhoanId==2){
+            if($loaiTaiKhoanId == 3){
                 $user->chucVuCaNhan = $request->input("chucVuCaNhan");
                 $user->tinhThanhPhoCaNhan = $request->input("tinhThanhPhoCaNhan");
                 $user->clbCaNhan = $request->input("clbCaNhan");
                 $user->truongCaNhan = $request->input("truongCaNhan");
             }
-            if($loaiTaiKhoanId == 3){
+            if($loaiTaiKhoanId == 2){
                 //clb
                 $user->tenClb = $request->input("tenClb");
                 $user->vietTatClb = $request->input("vietTatClb");
@@ -244,7 +241,6 @@ class UserService
             DB::rollback();
         }
     }
-
     public static function changePass($request){
         $validate = $request->validate([
             "id"=>"required",
@@ -264,5 +260,9 @@ class UserService
     }
     public static function getDeviceToken(){
         return User::select("deviceToken")->get();
+    }
+    public static function getCountKh(){
+        $user = User::count();
+        return response($user,200);
     }
 }

@@ -7,6 +7,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Api\WorkApi;
 use App\Http\Controllers\Api\UserApi;
 use App\Http\Controllers\Api\RoleApi;
+use App\Http\Controllers\Api\TinTucApi;
 use App\Http\Controllers\ClientController;
 /*
 |--------------------------------------------------------------------------
@@ -33,6 +34,11 @@ Route::prefix("/api")->group(function(){
             Route::get("/chi-tiet",[UserApi::class,'getById']);
             Route::post("/update",[UserApi::class,'update']);
             Route::post("/filter", [UserApi::class, 'filterUser']);
+            Route::get("/count", [UserApi::class, 'getCount']);
+        });
+
+        Route::prefix("/tin-tuc")->group(function(){
+            Route::get("/", [TinTucApi::class, 'getAll']);
         });
     });
     // ==============USER==============
