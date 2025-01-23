@@ -130,7 +130,7 @@ class UserService
             ]);
 
             $name = $request->input("userName");
-            $checkUser = User::where("userName",$name)->first();
+            $checkUser = User::where("userName",$name)->empty();
 
             if($checkUser == null || $checkUser=="") return response("Username đã tồn tại", 400);
 
@@ -193,13 +193,13 @@ class UserService
             ]);
             $user = User::where("guid", $request->input("guid"))
                         ->where("id", $request->input("id"))->first();
-            if($user==null || $user=="") response("Tên user ko đã tồn tại",400);
+            if($user==null || $user=="") response("Tên user ko tồn tại",400);
             $checkUserExist = User::where("userName",$request->input("userName"))
                                       ->where("id", "<>", $request->input("id"))
                                       ->get();
             
             if(!$checkUserExist->isEmpty()){
-                return response("Tên user đã tồn tại",400);
+                return response("Tên user đã tồn tạiiiii",400);
             }
             $user->userName = $request->input("userName");
             $user->name = $request->input("name");
