@@ -12,7 +12,28 @@ class TinTucApi extends Controller
     public function getAll(){
         return TinTucService::getAll();
     }
-    public function create(){
-        
+
+    //LOAI TIN TUC
+    public function getAllLoaiTinTuc(Request $request){
+        $filter = $request->input("filter");
+        $start = $request->input("start");
+        $limit = $request->input("limit");
+        return TinTucService::getAllLoaiTinTuc($filter, $start, $limit);
+    }
+    public function getCountLoaiTinTuc(Request $request){
+        $filter = $request->input("filter");
+        $start = $request->input("start");
+        $limit = $request->input("limit");
+        return TinTucService::countLoaiTinTuc($filter, $start, $limit);
+    }
+    public function getLoaiTinTucById(Request $request){
+        $id = $request->input("id");
+        return TinTucService::getByIdLoaiTintuc($id);
+    }
+    public function createLoaiTinTuc(Request $request){
+        return TinTucService::createLoaiTinTuc($request);
+    }
+    public function updateLoaitinTuc(Request $request){
+        return TinTucService::updateLoaiTinTuc($request);
     }
 }

@@ -34,11 +34,19 @@ Route::prefix("/api")->group(function(){
             Route::get("/chi-tiet",[UserApi::class,'getById']);
             Route::post("/update",[UserApi::class,'update']);
             Route::post("/filter", [UserApi::class, 'filterUser']);
-            Route::get("/count", [UserApi::class, 'getCount']);
+            Route::post("/count", [UserApi::class, 'getCount']);
         });
 
         Route::prefix("/tin-tuc")->group(function(){
             Route::get("/", [TinTucApi::class, 'getAll']);
+            Route::prefix("/loai-tin-tuc")->group(function(){
+                Route::post("/", [TinTucApi::class, 'getAllLoaiTinTuc']);
+                Route::post("/loai-tin-tuc/create", [TinTucApi::class, 'createLoaiTinTuc']);
+                Route::post("/count", [TinTucApi::class, 'getCountLoaiTinTuc']);
+                Route::get("/chi-tiet", [TinTucApi::class, 'getLoaiTinTucById']);
+                Route::post("/update", [TinTucApi::class, 'updateLoaitinTuc']);
+            });
+            
         });
     });
     // ==============USER==============

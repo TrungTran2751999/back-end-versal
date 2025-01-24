@@ -261,8 +261,22 @@ class UserService
     public static function getDeviceToken(){
         return User::select("deviceToken")->get();
     }
-    public static function getCountKh(){
-        $user = User::count();
-        return response($user,200);
+    public static function getCountKh($filter, $start, $limit){
+        $keyWord = $filter["keyWord"];
+        $sqlKeyWord = !UtilService::IsNullOrEmpty($keyWord) ? 
+        " (userName LIKE '%$keyWord%' OR name LIKE '%$keyWord%' OR email LIKE '%$keyWord%' OR dienThoaiCaNhan LIKE '%$keyWord%')" 
+        : "";
+
+        $tinhThanhPho = $filter["tinhThanhPho"];
+        $sqlTinhThanhPho = !UtilService::IsNullOrEmpty($tinhThanhPho) ? " (tinhThanhPhoDaiDienClb LIKE '%$tinhThanhPho%' OR tinhThanhPhoCaNhan" : "";
+
+        $loaiTaiKhoan = $filter["loaiTaiKhoan"];
+        $sqlLoaiTaiKhoan = $loaiTaiKhoan > 0 ? " loaiTaiKhoanId = $loaiTaiKhoan" : "";
+
+        $listCondition = UtilService::SqlHasCondition([$sqlKeyWord, $sqlTinhThanhPho, $sqlLoaiTaiKhoan]);
+        
+        $sql = "SELECT COUNT(id) as count FROM user $listCondition";
+
+        return response(DB::select($sql), 200);
     }
 }
