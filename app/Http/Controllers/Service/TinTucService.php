@@ -13,14 +13,32 @@ class TinTucService
 {
     // public const CHUA_DUYET = 0;
     // public const DA_DUYET = 1;
-    // public const LAM_LAI = 2;
-    public static function getAll(){
-        return TinTuc::get();
+    public static function getAll($filter, $start, $limit){
+        $keyWord = $filter["keyWord"];
+        $sqlKeyWord = !UtilService::IsNullOrEmpty($keyWord) ? 
+        " name LIKE '%$keyWord%'" 
+        : "";
+
+        $status = $filter["status"];
+        $sqlStatus = $status >= 0 ? " status = $status" : "";
+
+        $listCondition = UtilService::SqlHasCondition([$sqlKeyWord, $sqlStatus]);
+
+        $sqlPhanTrang = $limit > 0 ? " LIMIT $limit OFFSET $start" : "";
+        
+        $sql = "SELECT * FROM tin_tuc $listCondition $sqlPhanTrang";
+        
+        return response(DB::select($sql), 200);
     }
     public static function create($request){
+        $validate = $request->validate([
+            "name"=>"required",
+            "updatedBy"=>"required",
+            "content"=>"required",
+        ]);
         $name = $request->input("name");
         $checkTinTuc = TinTuc::where("name", $name)->first();
-        if($checkTinTuc != null) return response("Tên đã tồn tại", 400);
+        if($checkTinTuc != null) return response("Tên tin tức đã tồn tại", 400);
 
         $tinTuc = new TinTuc();
         $tinTuc->name = $request->input("name");
@@ -29,6 +47,7 @@ class TinTucService
         $tinTuc->loaiTinTucId = $request->input("loaiTinTucId");
         $tinTuc->createdAt = Carbon::now('Asia/Ho_Chi_Minh');
         $tinTuc->updatedAt = Carbon::now('Asia/Ho_Chi_Minh');
+        $tinTuc->updatedBy = 0;
         $tinTuc->status = 0;
     }
     //----------LOAI TIN TUC---------------------------------------------
@@ -98,9 +117,11 @@ class TinTucService
         $id = $request->input("id");
         if($name==null || $name=="") return response("Tên không hợp lệ", 400);
 
-        $checkLoaiTinTuc = LoaiTinTuc::where("name", $name)->where("id","<>", $id)->first();
+        $checkLoaiTinTuc = LoaiTinTuc::where("name", $name)->where("id","<>", $id)->where("isDeleted", true)->first();
 
-        if($checkLoaiTinTuc!=null || $checkLoaiTinTuc!="") return response("Tên đã tồn tại", 400);
+        if($checkLoaiTinTuc!=null || $checkLoaiTinTuc!=""){
+            return response("Tên đã tồn tại", 400);
+        }
 
         $loaiTinTuc = LoaiTinTuc::where("id", $id)->first();
         

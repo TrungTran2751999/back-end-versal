@@ -9,8 +9,11 @@ use App\Models\TinTuc;
 
 class TinTucApi extends Controller
 {
-    public function getAll(){
-        return TinTucService::getAll();
+    public function getAll(Request $request){
+        $filter = $request->input("filter");
+        $start = $request->input("start");
+        $limit = $request->input("limit");
+        return TinTucService::getAll($filter, $start, $limit);
     }
 
     //LOAI TIN TUC

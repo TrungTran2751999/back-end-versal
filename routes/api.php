@@ -38,10 +38,10 @@ Route::prefix("/api")->group(function(){
         });
 
         Route::prefix("/tin-tuc")->group(function(){
-            Route::get("/", [TinTucApi::class, 'getAll']);
+            Route::post("/", [TinTucApi::class, 'getAll']);
             Route::prefix("/loai-tin-tuc")->group(function(){
                 Route::post("/", [TinTucApi::class, 'getAllLoaiTinTuc']);
-                Route::post("/loai-tin-tuc/create", [TinTucApi::class, 'createLoaiTinTuc']);
+                Route::post("/create", [TinTucApi::class, 'createLoaiTinTuc']);
                 Route::post("/count", [TinTucApi::class, 'getCountLoaiTinTuc']);
                 Route::get("/chi-tiet", [TinTucApi::class, 'getLoaiTinTucById']);
                 Route::post("/update", [TinTucApi::class, 'updateLoaitinTuc']);
