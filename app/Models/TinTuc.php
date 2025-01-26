@@ -8,10 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class TinTuc extends Model
 {
     protected $table = 'tin_tuc';
+    public $timestamps = false;
     protected $fillable = [
         'id',
         'content',
-        'userId',
+        'guid',
         'createdAt',
         'updatedAt',
         'createdBy',

@@ -7,6 +7,7 @@ use App\Models\TinTuc;
 use App\Models\LoaiTinTuc;
 use App\Http\Controllers\Util\UtilService;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 use DB;
 
 class TinTucService
@@ -16,19 +17,49 @@ class TinTucService
     public static function getAll($filter, $start, $limit){
         $keyWord = $filter["keyWord"];
         $sqlKeyWord = !UtilService::IsNullOrEmpty($keyWord) ? 
-        " name LIKE '%$keyWord%'" 
+        " tt.name LIKE '%$keyWord%'" 
         : "";
 
         $status = $filter["status"];
-        $sqlStatus = $status >= 0 ? " status = $status" : "";
+        $sqlStatus = $status >= 0 ? " tt.status = $status" : "";
 
-        $listCondition = UtilService::SqlHasCondition([$sqlKeyWord, $sqlStatus]);
+        $loaiTinTuc = $filter["loaiTinTucId"];
+        $sqlLoaiTinTuc = $loaiTinTuc != null ? " ltt.id = $loaiTinTuc" :"";
+
+        $listCondition = UtilService::SqlHasCondition([$sqlKeyWord, $sqlStatus, $sqlLoaiTinTuc]);
 
         $sqlPhanTrang = $limit > 0 ? " LIMIT $limit OFFSET $start" : "";
         
-        $sql = "SELECT * FROM tin_tuc $listCondition $sqlPhanTrang";
+        $sql = "SELECT 
+        tt.*,
+        ltt.id as loaiTinTucId,
+        ltt.name as tenTinTuc
+        FROM tin_tuc as tt LEFT JOIN loai_tin_tuc as ltt ON tt.loaiTinTucId = ltt.id $listCondition $sqlPhanTrang";
         
         return response(DB::select($sql), 200);
+    }
+    public static function getCount($filter, $start, $limit){
+        $keyWord = $filter["keyWord"];
+        $sqlKeyWord = !UtilService::IsNullOrEmpty($keyWord) ? 
+        " tt.name LIKE '%$keyWord%'" 
+        : "";
+
+        $status = $filter["status"];
+        $sqlStatus = $status >= 0 ? " tt.status = $status" : "";
+
+        $loaiTinTuc = $filter["loaiTinTucId"];
+        $sqlLoaiTinTuc = $loaiTinTuc != null ? " ltt.id = $loaiTinTuc" :"";
+
+        $listCondition = UtilService::SqlHasCondition([$sqlKeyWord, $sqlStatus, $sqlLoaiTinTuc]);
+
+        $sql = "SELECT 
+        COUNT(tt.id) as count
+        FROM tin_tuc as tt LEFT JOIN loai_tin_tuc as ltt ON tt.loaiTinTucId = ltt.id $listCondition";
+        return response(DB::select($sql), 200);
+
+    }
+    public static function getAllActive(){
+        return LoaiTinTuc::where("isDeleted",false)->get();
     }
     public static function create($request){
         $validate = $request->validate([
@@ -41,14 +72,49 @@ class TinTucService
         if($checkTinTuc != null) return response("Tên tin tức đã tồn tại", 400);
 
         $tinTuc = new TinTuc();
+        $tinTuc->guid = Str::uuid()->toString();
         $tinTuc->name = $request->input("name");
         $tinTuc->content = $request->input("content");
-        $tinTuc->userId = $request->input("userId");
         $tinTuc->loaiTinTucId = $request->input("loaiTinTucId");
         $tinTuc->createdAt = Carbon::now('Asia/Ho_Chi_Minh');
         $tinTuc->updatedAt = Carbon::now('Asia/Ho_Chi_Minh');
-        $tinTuc->updatedBy = 0;
+        $tinTuc->updatedBy = $request->input("updatedBy");
+        $tinTuc->createdBy = $request->input("updatedBy");
         $tinTuc->status = 0;
+        $tinTuc->id = TinTuc::max("id")+1;
+        $tinTuc->save();
+    }
+    public static function getById($id){
+        return TinTuc::where("guid", $id)->first();
+    }
+    public static function update($request){
+        $validate = $request->validate([
+            "id"=>"required",
+            "name"=>"required",
+            "updatedBy"=>"required",
+            "content"=>"required"
+        ]);
+        $name = $request->input("name");
+        $id = $request->input("id");
+        $guid = $request->input("guid");
+        if($name==null || $name=="") return response("Tên không hợp lệ", 400);
+
+        $checkTinTuc = TinTuc::where("id","<>", $id)
+                              ->where("guid","<>", $guid)
+                              ->where("name", $name)->first();
+        if($checkTinTuc != null) return response("Tên tin tức đã tồn tại", 400);
+        $tinTuc = TinTuc::where("id", $id)->where("guid", $guid)->first();
+        if($tinTuc != null){
+            $tinTuc->name = $name;
+            $tinTuc->status = $request->input("status");
+            $tinTuc->loaiTinTucId = $request->input("loaiTinTucId");
+            $tinTuc->content = $request->input("content");
+            $tinTuc->updatedAt = Carbon::now('Asia/Ho_Chi_Minh');
+            $tinTuc->save();
+            return response("OK",200);
+        }
+        return reponse("FAIL",500);
+
     }
     //----------LOAI TIN TUC---------------------------------------------
     public static function getAllLoaiTinTuc($filter, $start, $limit){
