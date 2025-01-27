@@ -56,7 +56,10 @@ Route::prefix("/api")->group(function(){
 
         Route::prefix("/tournament")->group(function(){
             Route::prefix("/the-loai-game")->group(function(){
-                Route::post("/filter", [TheLoaiGameApi::class, 'filter']);
+                Route::post("/", [TheLoaiGameApi::class, 'getAll']);
+                Route::get("/chi-tiet", [TheLoaiGameApi::class, 'getById']);
+                Route::post("/create", [TheLoaiGameApi::class, 'create']);
+                Route::post("/update", [TheLoaiGameApi::class, 'update']);
             });
         });
     });

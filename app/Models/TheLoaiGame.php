@@ -13,6 +13,7 @@ class TheLoaiGame extends Model
         'id',
         'name',
         'tenVietTat',
+        'isDeleted',
         'image',
         'createdAt',
         'updatedAt',
