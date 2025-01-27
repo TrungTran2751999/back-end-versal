@@ -43,7 +43,7 @@ class UserService
         : "";
 
         $tinhThanhPho = $filter["tinhThanhPho"];
-        $sqlTinhThanhPho = !UtilService::IsNullOrEmpty($tinhThanhPho) ? " (tinhThanhPhoDaiDienClb LIKE '%$tinhThanhPho%' OR tinhThanhPhoCaNhan" : "";
+        $sqlTinhThanhPho = !UtilService::IsNullOrEmpty($tinhThanhPho) ? " (tinhThanhPhoDaiDienClb LIKE '%$tinhThanhPho%' OR tinhThanhPhoCaNhan LIKE '%$tinhThanhPho%')" : "";
 
         $loaiTaiKhoan = $filter["loaiTaiKhoan"];
         $sqlLoaiTaiKhoan = $loaiTaiKhoan > 0 ? " loaiTaiKhoanId = $loaiTaiKhoan" : "";
@@ -268,7 +268,7 @@ class UserService
         : "";
 
         $tinhThanhPho = $filter["tinhThanhPho"];
-        $sqlTinhThanhPho = !UtilService::IsNullOrEmpty($tinhThanhPho) ? " (tinhThanhPhoDaiDienClb LIKE '%$tinhThanhPho%' OR tinhThanhPhoCaNhan" : "";
+        $sqlTinhThanhPho = !UtilService::IsNullOrEmpty($tinhThanhPho) ? " (tinhThanhPhoDaiDienClb LIKE '%$tinhThanhPho%' OR tinhThanhPhoCaNhan LIKE '%$tinhThanhPho%')" : "";
 
         $loaiTaiKhoan = $filter["loaiTaiKhoan"];
         $sqlLoaiTaiKhoan = $loaiTaiKhoan > 0 ? " loaiTaiKhoanId = $loaiTaiKhoan" : "";

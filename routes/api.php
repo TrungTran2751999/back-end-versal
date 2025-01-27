@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\WorkApi;
 use App\Http\Controllers\Api\UserApi;
 use App\Http\Controllers\Api\RoleApi;
 use App\Http\Controllers\Api\TinTucApi;
+use App\Http\Controllers\Api\TheLoaiGameApi;
 use App\Http\Controllers\ClientController;
 /*
 |--------------------------------------------------------------------------
@@ -51,7 +52,12 @@ Route::prefix("/api")->group(function(){
                 Route::get("/chi-tiet", [TinTucApi::class, 'getLoaiTinTucById']);
                 Route::post("/update", [TinTucApi::class, 'updateLoaitinTuc']);
             });
-            
+        });
+
+        Route::prefix("/tournament")->group(function(){
+            Route::prefix("/the-loai-game")->group(function(){
+                Route::post("/filter", [TheLoaiGameApi::class, 'filter']);
+            });
         });
     });
     // ==============USER==============
