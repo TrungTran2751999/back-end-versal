@@ -16,6 +16,9 @@ class TheLoaiGameApi extends Controller
         $limit = $request->input("limit");
         return TheLoaiGameService::getAll($filter, $start, $limit);
     }
+    public static function getAllActive(){
+        return TheLoaiGameService::getAllActive();
+    }
     public static function create(Request $request){
         return TheLoaiGameService::create($request);
     }

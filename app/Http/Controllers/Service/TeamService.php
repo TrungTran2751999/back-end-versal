@@ -1,0 +1,84 @@
+<?php
+
+namespace App\Http\Controllers\Service;
+
+use Illuminate\Http\Request;
+use Carbon\Carbon;
+use Illuminate\Support\Str;
+use App\Http\Controllers\Util\UtilService;
+use App\Models\Team;
+use DB;
+
+class TeamService
+{
+    public static function getAllActive(){
+        return Team::where("isDeleted", false)->get();
+    }
+    public static function getAll($filter, $start, $limit){
+        $keyWord = $filter["keyWord"];
+        $sqlKeyWord = !UtilService::IsNullOrEmpty($keyWord) ? 
+        " (name LIKE '%$keyWord%')" 
+        : "";
+
+        $status = $filter["status"];
+        $sqlStatus = $status >= 0 ? " isBan = $status" : "";
+
+
+        $sqlPhanTrang = $limit > 0 ? " LIMIT $limit OFFSET $start" : "";
+
+        $listCondition = UtilService::SqlHasCondition([$sqlKeyWord, $sqlStatus]);
+        
+        $sql = "SELECT * FROM team $listCondition $sqlPhanTrang";
+
+        $sqlCount = "SELECT COUNT(id) as count FROM team $listCondition";
+
+        $result = [
+            "listData"=>DB::select($sql),
+            "count"=>DB::select($sqlCount)
+        ];
+
+        return response($result, 200);
+    }
+    public static function getById($id, $guid){
+        return Team::where("guid", $guid)->where("id", $id)->first();
+    }
+    public static function create($request){
+        $name = $request->input("name");
+        $checkName = Team::where("name", $name)->first();
+        if($checkName!=null) return response("Tên đã tồn tại", 400);
+        
+        $team = new Team();
+        $team->name = $request->input("name");
+        $team->guid = Str::uuid()->toString();
+        $team->description = $request->input("description");
+        $team->image = $request->input("image");
+        $team->userId = $request->input("userId");
+        $team->theLoaiGameId = $request->input("theLoaiGameId");
+        $team->updatedBy = $request->input("updatedBy");
+        $team->createdBy = $request->input("updatedBy");
+        $team->createdAt = Carbon::now('Asia/Ho_Chi_Minh');
+        $team->updatedAt = Carbon::now('Asia/Ho_Chi_Minh');
+        $team->isBan = 0;
+        $team->id = Team::max("id") + 1;
+        $team->save();
+    }
+    public static function update($request){
+        $name = $request->input("name");
+        $id = $request->input("id");
+        $guid = $request->input("guid");
+        $checkName = Team::where("id","<>", $id)->where("name", $name)->first();
+        if($checkName != null) return response("Tên đã tồn tại", 400);
+
+        $team = Team::where("id", $id)->where("guid", $guid)->first();
+        if($team != null){
+            $team->name = $name;
+            $team->description = $request->input("description");
+            $team->image = $request->input("image");
+            $team->theLoaiGameId = $request->input("theLoaiGameId");
+            $team->isBan = $request->input("status");
+            $team->save();
+            return response("OK",200);
+        }
+        return response("FAIL",500);
+    }
+}

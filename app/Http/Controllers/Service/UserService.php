@@ -20,7 +20,7 @@ use DB;
 class UserService
 {
     public static function getAll(){
-        $user = User::select("id", "userName", "name","passWord")->get();
+        $user = User::where("loaiTaiKhoanId", 2)->select("id", "guid", "userName", "name")->get();
         return response($user,200);
     }
     public static function getAllPaginate($start, $limit){

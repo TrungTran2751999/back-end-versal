@@ -11,6 +11,9 @@ use DB;
 
 class TheLoaiGameService
 {
+    public static function getAllActive(){
+        return TheLoaiGame::where("isDeleted", false)->select("id", "name", "tenVietTat", "isDeleted")->get();
+    }
     public static function getAll($filter, $start, $limit){
         $keyWord = $filter["keyWord"];
         $sqlKeyWord = !UtilService::IsNullOrEmpty($keyWord) ? 
@@ -18,7 +21,7 @@ class TheLoaiGameService
         : "";
 
         $status = $filter["status"];
-        $sqlStatus = $status > 0 ? " isDeleted = $status" : "";
+        $sqlStatus = $status >= 0 ? " isDeleted = $status" : "";
 
 
         $sqlPhanTrang = $limit > 0 ? " LIMIT $limit OFFSET $start" : "";

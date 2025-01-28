@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\UserApi;
 use App\Http\Controllers\Api\RoleApi;
 use App\Http\Controllers\Api\TinTucApi;
 use App\Http\Controllers\Api\TheLoaiGameApi;
+use App\Http\Controllers\Api\TeamApi;
 use App\Http\Controllers\ClientController;
 /*
 |--------------------------------------------------------------------------
@@ -36,6 +37,7 @@ Route::prefix("/api")->group(function(){
             Route::post("/update",[UserApi::class,'update']);
             Route::post("/filter", [UserApi::class, 'filterUser']);
             Route::post("/count", [UserApi::class, 'getCount']);
+            Route::get("/active", [UserApi::class, 'getAll']);
         });
 
         Route::prefix("/tin-tuc")->group(function(){
@@ -60,6 +62,13 @@ Route::prefix("/api")->group(function(){
                 Route::get("/chi-tiet", [TheLoaiGameApi::class, 'getById']);
                 Route::post("/create", [TheLoaiGameApi::class, 'create']);
                 Route::post("/update", [TheLoaiGameApi::class, 'update']);
+                Route::get("/active", [TheLoaiGameApi::class, 'getAllActive']);
+            });
+            Route::prefix("/team")->group(function(){
+               Route::post("/", [TeamApi::class, 'getAll']);
+               Route::get("/chi-tiet", [TeamApi::class, 'getById']);
+               Route::post("/create", [TeamApi::class, 'create']);
+               Route::post("/update", [TeamApi::class, 'update']);
             });
         });
     });
