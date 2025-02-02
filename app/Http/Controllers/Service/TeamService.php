@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Str;
 use App\Http\Controllers\Util\UtilService;
 use App\Models\Team;
+use App\Models\TeamMember;
 use DB;
 
 class TeamService
@@ -60,7 +61,16 @@ class TeamService
         $team->updatedAt = Carbon::now('Asia/Ho_Chi_Minh');
         $team->isBan = 0;
         $team->id = Team::max("id") + 1;
+        $team->positionLeader = $request->input("positionLeader");
         $team->save();
+
+        $teamMember = [];
+        $teamMember["teamId"] = $teamId;
+        $teamMember["userId"] = $userId;
+        $teamMember["position"] = $request->input("position");
+        $teamMemberRes["updatedBy"] = $request->input("updatedBy");
+
+        addMember($teamMember, $request);
     }
     public static function update($request){
         $name = $request->input("name");
@@ -80,5 +90,45 @@ class TeamService
             return response("OK",200);
         }
         return response("FAIL",500);
+    }
+    public static function addMember($teamMemberRes){
+        $teamId = $teamMemberRes["teamId"];
+        $userId = $teamMemberRes["userId"];
+        
+        $checkMember = TeamMember::where("userId", $userId)->where("teamId", $teamId)->first();
+        if($checkMember!=null) return response("Member đã tồn tại", 400);
+        $teamMember = new TeamMember();
+        $teamMember->position = $teamMemberRes["position"];
+        $teamMember->teamId = $teamId;
+        $teamMember->userId = $userId;
+        $teamMember->createdBy = $teamMemberRes["updatedBy"];
+        $teamMember->updatedBy = $teamMemberRes["updatedBy"];
+        $teamMember->createdAt = Carbon::now('Asia/Ho_Chi_Minh');
+        $teamMember->updatedAt = Carbon::now('Asia/Ho_Chi_Minh');
+        $teamMember->save();
+    }
+    public static function getMemberOfTeam($filter, $start, $limit){
+        $keyWord = $filter["keyWord"];
+        $sqlKeyWord = !UtilService::IsNullOrEmpty($keyWord) ? 
+        " (u.name LIKE '%$keyWord%')" 
+        : "";
+
+        $status = $filter["status"];
+        $sqlStatus = $status >= 0 ? " tm.isDeleted = $status" : "";
+
+        $sqlPhanTrang = $limit > 0 ? " LIMIT $limit OFFSET $start" : "";
+
+        $listCondition = UtilService::SqlHasCondition([$sqlKeyWord, $sqlStatus]);
+
+        $members = DB::select("SELECT tm.position, u.userId, u.name , u.isDeleted
+                                FROM user as u JOIN team_member as tm
+                                ON u.id = tm.userId $listCondition $sqlPhanTrang")->get();
+        $memberTotal = DB::select("SELECT COUNT(u.userId)
+                                FROM user as u JOIN team_member as tm
+                                ON u.id = tm.userId $listCondition")->first();
+        $result = [];
+        $result["members"] = $members;
+        $result["total"] = $memberTotal;
+        return $result;
     }
 }

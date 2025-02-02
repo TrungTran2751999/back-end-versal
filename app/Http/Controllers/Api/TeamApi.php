@@ -29,4 +29,8 @@ class TeamApi extends Controller
     public function update(Request $request){
         return TeamService::update($request);
     }
+    public function getMemberOfTeam(Request $request){
+        $teamId = $request->input("teamId");
+        return TeamService::getMemberOfTeam($teamId);
+    }
 }

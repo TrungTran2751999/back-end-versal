@@ -69,6 +69,7 @@ Route::prefix("/api")->group(function(){
                Route::get("/chi-tiet", [TeamApi::class, 'getById']);
                Route::post("/create", [TeamApi::class, 'create']);
                Route::post("/update", [TeamApi::class, 'update']);
+               Route::post("/member", [TeamApi::class, 'getMemberOfTeam']);
             });
         });
     });
