@@ -105,6 +105,7 @@ class TeamService
         $teamMember->updatedBy = $teamMemberRes["updatedBy"];
         $teamMember->createdAt = Carbon::now('Asia/Ho_Chi_Minh');
         $teamMember->updatedAt = Carbon::now('Asia/Ho_Chi_Minh');
+        $teamMember->id = TeamMember::max("id") + 1;
         $teamMember->save();
     }
     public static function getMemberOfTeam($filter, $start, $limit){
@@ -120,12 +121,12 @@ class TeamService
 
         $listCondition = UtilService::SqlHasCondition([$sqlKeyWord, $sqlStatus]);
 
-        $members = DB::select("SELECT tm.position, u.userId, u.name , u.isDeleted
+        $members = DB::select("SELECT tm.position, u.id, u.name , tm.isDeleted
                                 FROM user as u JOIN team_member as tm
-                                ON u.id = tm.userId $listCondition $sqlPhanTrang")->get();
-        $memberTotal = DB::select("SELECT COUNT(u.userId)
+                                ON u.id = tm.userId $listCondition $sqlPhanTrang");
+        $memberTotal = DB::select("SELECT COUNT(u.id) as count
                                 FROM user as u JOIN team_member as tm
-                                ON u.id = tm.userId $listCondition")->first();
+                                ON u.id = tm.userId $listCondition");
         $result = [];
         $result["members"] = $members;
         $result["total"] = $memberTotal;

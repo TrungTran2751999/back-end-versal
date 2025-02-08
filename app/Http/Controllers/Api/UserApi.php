@@ -13,6 +13,9 @@ class UserApi extends Controller
     public function getAll(){
         return UserService::getAll();
     }
+    public function getAllCaNhan(){
+        return UserService::getAllCaNhan();
+    }
     public function getAllPaginate(Request $request){
         $validate = $request->validate([
             "start"=>"required",

@@ -38,6 +38,7 @@ Route::prefix("/api")->group(function(){
             Route::post("/filter", [UserApi::class, 'filterUser']);
             Route::post("/count", [UserApi::class, 'getCount']);
             Route::get("/active", [UserApi::class, 'getAll']);
+            Route::get("/ca-nhan-active", [UserApi::class, 'getAllCaNhan']);
         });
 
         Route::prefix("/tin-tuc")->group(function(){
@@ -70,6 +71,7 @@ Route::prefix("/api")->group(function(){
                Route::post("/create", [TeamApi::class, 'create']);
                Route::post("/update", [TeamApi::class, 'update']);
                Route::post("/member", [TeamApi::class, 'getMemberOfTeam']);
+               Route::post("/member/add", [TeamApi::class, 'addMemberTeam']);
             });
         });
     });

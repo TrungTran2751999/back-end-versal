@@ -23,6 +23,10 @@ class UserService
         $user = User::where("loaiTaiKhoanId", 2)->select("id", "guid", "userName", "name")->get();
         return response($user,200);
     }
+    public static function getAllCaNhan(){
+        $user = User::where("loaiTaiKhoanId", 3)->select("id", "guid", "userName", "name")->get();
+        return response($user,200);
+    }
     public static function getAllPaginate($start, $limit){
         $listUser = DB::select("SELECT 
         id,
@@ -130,9 +134,9 @@ class UserService
             ]);
 
             $name = $request->input("userName");
-            $checkUser = User::where("userName",$name)->empty();
+            $checkUser = User::where("userName",$name)->first();
 
-            if($checkUser == null || $checkUser=="") return response("Username đã tồn tại", 400);
+            if($checkUser != null || $checkUser!="") return response("Username đã tồn tại", 400);
 
             $user = new User();
             $user->userName = $request->input("userName");
