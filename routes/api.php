@@ -72,6 +72,7 @@ Route::prefix("/api")->group(function(){
                Route::post("/update", [TeamApi::class, 'update']);
                Route::post("/member", [TeamApi::class, 'getMemberOfTeam']);
                Route::post("/member/add", [TeamApi::class, 'addMemberTeam']);
+               Route::post("/member/delete", [TeamApi::class, 'xoaMemberTeam']);
             });
         });
     });

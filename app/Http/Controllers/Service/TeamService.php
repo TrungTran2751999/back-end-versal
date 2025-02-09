@@ -44,33 +44,41 @@ class TeamService
         return Team::where("guid", $guid)->where("id", $id)->first();
     }
     public static function create($request){
-        $name = $request->input("name");
-        $checkName = Team::where("name", $name)->first();
-        if($checkName!=null) return response("Tên đã tồn tại", 400);
-        
-        $team = new Team();
-        $team->name = $request->input("name");
-        $team->guid = Str::uuid()->toString();
-        $team->description = $request->input("description");
-        $team->image = $request->input("image");
-        $team->userId = $request->input("userId");
-        $team->theLoaiGameId = $request->input("theLoaiGameId");
-        $team->updatedBy = $request->input("updatedBy");
-        $team->createdBy = $request->input("updatedBy");
-        $team->createdAt = Carbon::now('Asia/Ho_Chi_Minh');
-        $team->updatedAt = Carbon::now('Asia/Ho_Chi_Minh');
-        $team->isBan = 0;
-        $team->id = Team::max("id") + 1;
-        $team->positionLeader = $request->input("positionLeader");
-        $team->save();
+        DB::beginTransaction();
+        try{
 
-        $teamMember = [];
-        $teamMember["teamId"] = $teamId;
-        $teamMember["userId"] = $userId;
-        $teamMember["position"] = $request->input("position");
-        $teamMemberRes["updatedBy"] = $request->input("updatedBy");
+            $name = $request->input("name");
+            $checkName = Team::where("name", $name)->first();
+            if($checkName!=null) return response("Tên đã tồn tại", 400);
+            
+            $team = new Team();
+            $team->name = $request->input("name");
+            $team->guid = Str::uuid()->toString();
+            $team->description = $request->input("description");
+            $team->image = $request->input("image");
+            $team->userId = $request->input("userId");
+            $team->theLoaiGameId = $request->input("theLoaiGameId");
+            $team->updatedBy = $request->input("updatedBy");
+            $team->createdBy = $request->input("updatedBy");
+            $team->createdAt = Carbon::now('Asia/Ho_Chi_Minh');
+            $team->updatedAt = Carbon::now('Asia/Ho_Chi_Minh');
+            $team->isBan = 0;
+            $team->id = Team::max("id") + 1;
+            $team->positionLeader = $request->input("positionLeader");
 
-        addMember($teamMember, $request);
+            $teamMember = [];
+            $teamMember["teamId"] = $team->id;
+            $teamMember["userId"] = $team->userId;
+            $teamMember["position"] = $request->input("positionLeader");
+            $teamMember["updatedBy"] = $request->input("updatedBy");
+
+            $team->save();
+
+            TeamService::addMember($teamMember, $request);
+            DB::commit();
+        }catch(Exeption $e){
+            DB::rollBack();
+        }
     }
     public static function update($request){
         $name = $request->input("name");
@@ -106,6 +114,7 @@ class TeamService
         $teamMember->createdAt = Carbon::now('Asia/Ho_Chi_Minh');
         $teamMember->updatedAt = Carbon::now('Asia/Ho_Chi_Minh');
         $teamMember->id = TeamMember::max("id") + 1;
+        $teamMember->isDeleted = 0;
         $teamMember->save();
     }
     public static function getMemberOfTeam($filter, $start, $limit){
@@ -114,6 +123,8 @@ class TeamService
         " (u.name LIKE '%$keyWord%')" 
         : "";
 
+        $id = $filter["id"];
+
         $status = $filter["status"];
         $sqlStatus = $status >= 0 ? " tm.isDeleted = $status" : "";
 
@@ -121,15 +132,21 @@ class TeamService
 
         $listCondition = UtilService::SqlHasCondition([$sqlKeyWord, $sqlStatus]);
 
-        $members = DB::select("SELECT tm.position, u.id, u.name , tm.isDeleted
+        $members = DB::select("SELECT tm.position, u.id, u.name , tm.isDeleted, tm.position
                                 FROM user as u JOIN team_member as tm
-                                ON u.id = tm.userId $listCondition $sqlPhanTrang");
+                                ON u.id = tm.userId $listCondition AND tm.teamId = $id $sqlPhanTrang");
         $memberTotal = DB::select("SELECT COUNT(u.id) as count
                                 FROM user as u JOIN team_member as tm
-                                ON u.id = tm.userId $listCondition");
+                                ON u.id = tm.userId $listCondition AND tm.teamId = $id");
         $result = [];
         $result["members"] = $members;
         $result["total"] = $memberTotal;
         return $result;
+    }
+    public static function xoaMemberOfTeam($userId, $teamId){
+        $memberXoa = TeamMember::where("userId", $userId)->where("teamId", $teamId)->first();
+        if($memberXoa==null) return response("member không tồn tại", 400);
+        $memberXoa->isDeleted = 1;
+        $memberXoa->save();
     }
 }

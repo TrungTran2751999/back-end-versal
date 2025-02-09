@@ -38,4 +38,9 @@ class TeamApi extends Controller
     public function addMemberTeam(Request $request){
         return TeamService::addMember($request);
     }
+    public function xoaMemberTeam(Request $request){
+        $userId = $request["userId"];
+        $teamId = $request["teamId"];
+        return TeamService::xoaMemberOfTeam($userId, $teamId);
+    }
 }
