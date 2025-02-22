@@ -33,8 +33,9 @@ class TinTucService
         $sql = "SELECT 
         tt.*,
         ltt.id as loaiTinTucId,
-        ltt.name as tenTinTuc
-        FROM tin_tuc as tt LEFT JOIN loai_tin_tuc as ltt ON tt.loaiTinTucId = ltt.id $listCondition $sqlPhanTrang";
+        ltt.name as tenLoaiTinTuc
+        FROM tin_tuc as tt LEFT JOIN loai_tin_tuc as ltt ON tt.loaiTinTucId = ltt.id $listCondition 
+        ORDER BY tt.createdAt DESC  $sqlPhanTrang";
         
         return response(DB::select($sql), 200);
     }
@@ -81,6 +82,7 @@ class TinTucService
         $tinTuc->updatedBy = $request->input("updatedBy");
         $tinTuc->createdBy = $request->input("updatedBy");
         $tinTuc->status = 0;
+        $tinTuc->avartar = $request->input("avartar");
         $tinTuc->id = TinTuc::max("id")+1;
         $tinTuc->save();
     }
@@ -110,11 +112,22 @@ class TinTucService
             $tinTuc->loaiTinTucId = $request->input("loaiTinTucId");
             $tinTuc->content = $request->input("content");
             $tinTuc->updatedAt = Carbon::now('Asia/Ho_Chi_Minh');
+            $tinTuc->avartar = $request->input("avartar");
             $tinTuc->save();
             return response("OK",200);
         }
         return reponse("FAIL",500);
 
+    }
+    public static function duyetBai($request){
+        $validate = $request->validate([
+            "id"=>"required",
+            "status"=>"required"
+        ]);
+        $id = $request->input("id");
+        $checkTinTuc = TinTuc::where("id", $id)->first();
+        $checkTinTuc->status = $request->input("status");
+        $checkTinTuc->save();
     }
     //----------LOAI TIN TUC---------------------------------------------
     public static function getAllLoaiTinTuc($filter, $start, $limit){

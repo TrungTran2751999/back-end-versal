@@ -47,6 +47,7 @@ Route::prefix("/api")->group(function(){
             Route::post("/count", [TinTucApi::class, 'getCount']);
             Route::post("/create", [TinTucApi::class, 'create']);
             Route::post("/update", [TinTucApi::class, 'update']);
+            Route::post("/duyet-bai", [TinTucApi::class, 'duyetBai']);
             Route::prefix("/loai-tin-tuc")->group(function(){
                 Route::post("/", [TinTucApi::class, 'getAllLoaiTinTuc']);
                 Route::get("/active", [TinTucApi::class, 'getAllActive']);

@@ -46,6 +46,7 @@ class Handler extends ExceptionHandler
             return response("Unauthorized",400);
         }
         if($exception instanceof NotFoundHttpException){
+            return view("404");
             return response("Not found",404);
         }
 

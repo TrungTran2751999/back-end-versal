@@ -57,4 +57,7 @@ class TinTucApi extends Controller
     public function updateLoaitinTuc(Request $request){
         return TinTucService::updateLoaiTinTuc($request);
     }
+    public function duyetBai(Request $request){
+        return TinTucService::duyetBai($request);
+    }
 }
