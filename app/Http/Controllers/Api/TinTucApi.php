@@ -60,4 +60,9 @@ class TinTucApi extends Controller
     public function duyetBai(Request $request){
         return TinTucService::duyetBai($request);
     }
+    public function getByIdClient(Request $request){
+        $guid = $request->input("id");
+        $loaiTinTucId = $request->input("loaiTinTucId");
+        return TinTucService::getByIdClient($guid, $loaiTinTucId);
+    }
 }

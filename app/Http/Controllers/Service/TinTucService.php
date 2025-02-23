@@ -89,6 +89,38 @@ class TinTucService
     public static function getById($id){
         return TinTuc::where("guid", $id)->first();
     }
+    public static function getByIdClient($guid, $loaiTinTucId){
+        $tinTucClient = [];
+        $sqlSelected = "SELECT 
+                tt.content, 
+                tt.name, 
+                tt.avartar, 
+                ltt.name as tenLoaiTinTuc,
+                tt.updatedAt
+                FROM tin_tuc as tt
+        LEFT JOIN loai_tin_tuc as ltt ON tt.loaiTinTucId = ltt.id WHERE tt.guid = '$guid'"; 
+
+        $tinTucClient["selected"] = DB::select($sqlSelected);
+
+        $sqlLienQuan = "SELECT 
+                tt.content, 
+                tt.name, 
+                tt.guid,
+                tt.avartar, 
+                tt.loaiTinTucId,
+                ltt.name as tenLoaiTinTuc,
+                tt.updatedAt
+                FROM tin_tuc as tt
+        LEFT JOIN loai_tin_tuc as ltt ON tt.loaiTinTucId = ltt.id 
+        WHERE tt.guid <> '$guid'
+        AND tt.loaiTinTucId = '$loaiTinTucId'
+        ORDER BY tt.createdAt DESC 
+        LIMIT 8 OFFSET 0"; 
+
+        $tinTucClient["lienQuan"] = DB::select($sqlLienQuan);
+
+        return response($tinTucClient, 200);
+    }
     public static function update($request){
         $validate = $request->validate([
             "id"=>"required",
