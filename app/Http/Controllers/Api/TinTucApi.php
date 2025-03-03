@@ -37,6 +37,9 @@ class TinTucApi extends Controller
     public function getTinTucByLoaiTinTuc(Request $request){
         return TinTucService::getTinTucByLoaiTinTuc($request);
     }
+    public function getListTinTucByLoaiTinTucInClient(Request $request){
+        return TinTucService::getListTinTucByLoaiTinTucInClient($request);
+    }
     //LOAI TIN TUC
     public function getAllActive(){
         return TinTucService::getAllActive();

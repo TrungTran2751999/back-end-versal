@@ -194,6 +194,20 @@ class TinTucService
         $result["loaiTinTuc"] = DB::select($sqlLoaiTinTuc);
         return response($result, 200);
     }
+    public static function getListTinTucByLoaiTinTucInClient($request){
+        $sql = "SELECT 
+                a.id as LoaiTinTucId,
+                a.name as TinTucName,
+                b.id as TinTucId,
+                b.name as TinTucName,
+                b.content as TinTucContent,
+                b.ngay_dang_bai as TinTucCreatedAt
+                FROM loai_tin_tuc a 
+                LEFT JOIN (SELECT * FROM tin_tuc ORDER BY createdAt DESC LIMIT 4) b 
+                ON a.id = b.loaiTinTucId
+                WHERE b.id IS NOT NULL";
+        return DB::select($sql);
+    }
     //----------LOAI TIN TUC---------------------------------------------
     public static function getAllLoaiTinTuc($filter, $start, $limit){
         $keyWord = $filter["keyWord"];

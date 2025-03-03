@@ -83,6 +83,7 @@ Route::prefix("/api")->group(function(){
             Route::get("/", [TinTucApi::class, 'getAllInClient']);
             Route::get("/chi-tiet", [TinTucApi::class, 'getByIdClient']);
             Route::post("/by-loai-tin-tuc", [TinTucApi::class, 'getTinTucByLoaiTinTuc']);
+            Route::get("/allow-loai-tin-tuc", [TinTucApi::class, 'getListTinTucByLoaiTinTucInClient']);
         });
         Route::prefix("/loai-tin-tuc")->group(function(){
             Route::get("/chi-tiet", [TinTucApi::class, 'getByIdLoaiTinTucClient']);
