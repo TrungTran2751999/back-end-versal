@@ -195,18 +195,41 @@ class TinTucService
         return response($result, 200);
     }
     public static function getListTinTucByLoaiTinTucInClient($request){
-        $sql = "SELECT 
-                a.id as LoaiTinTucId,
-                a.name as TinTucName,
-                b.id as TinTucId,
-                b.name as TinTucName,
-                b.content as TinTucContent,
-                b.ngay_dang_bai as TinTucCreatedAt
-                FROM loai_tin_tuc a 
-                LEFT JOIN (SELECT * FROM tin_tuc ORDER BY createdAt DESC LIMIT 4) b 
-                ON a.id = b.loaiTinTucId
-                WHERE b.id IS NOT NULL";
-        return DB::select($sql);
+        $listLoaiTinTucId = LoaiTinTuc::select("id", "name")->get();
+        $countListLoaiTinTucId = count($listLoaiTinTucId);
+        $sql = "";
+        for($i=0; $i < $countListLoaiTinTucId; $i++){
+            $loaiTinTucId = $listLoaiTinTucId[$i]["id"];
+            if($i < $countListLoaiTinTucId-1){
+                $sql = $sql."(SELECT tt.name, 
+                        tt.guid, tt.content, 
+                        ltt.id as loaiTinTucId, 
+                        ltt.name as loaiTinTucName,
+                        tt.avartar,
+                        tt.updatedAt
+                        FROM tin_tuc tt
+                        LEFT JOIN loai_tin_tuc ltt ON tt.loaiTinTucId = ltt.id
+                        WHERE tt.loaiTinTucId = $loaiTinTucId ORDER BY tt.createdAt LIMIT 4)
+                        UNION ";
+            }else{
+                $sql = $sql."(SELECT 
+                        tt.name, 
+                        tt.guid, 
+                        tt.content, 
+                        ltt.id as loaiTinTucId, 
+                        ltt.name as loaiTinTucName,
+                        tt.avartar,
+                        tt.updatedAt
+                        FROM tin_tuc tt
+                        LEFT JOIN loai_tin_tuc ltt ON tt.loaiTinTucId = ltt.id
+                        WHERE tt.loaiTinTucId = $loaiTinTucId ORDER BY tt.createdAt LIMIT 4)";
+            }
+        }
+        $result = [];
+        $result["listLoaiTinTucId"] = $listLoaiTinTucId;
+        $result["listTinTuc"] = DB::select($sql);
+
+        return $result;
     }
     //----------LOAI TIN TUC---------------------------------------------
     public static function getAllLoaiTinTuc($filter, $start, $limit){
